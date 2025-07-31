@@ -50,7 +50,7 @@ public class FileInfoVO {
     /**
      * 1:视频 2:音频  3:图片 4:文档 5:其他
      */
-    private Integer fileCatogary;
+    private Integer fileCategory;
 
     /**
      * 1:视频 2:音频  3:图片 4:pdf 5:doc 6:excel 7:txt 8:code 9:zip 10:其他
@@ -118,12 +118,12 @@ public class FileInfoVO {
         this.folderType = folderType;
     }
 
-    public Integer getFileCatogary() {
-        return fileCatogary;
+    public Integer getFileCategory() {
+        return fileCategory;
     }
 
-    public void setFileCatogary(Integer fileCatogary) {
-        this.fileCatogary = fileCatogary;
+    public void setFileCategory(Integer fileCategory) {
+        this.fileCategory = fileCategory;
     }
 
     public Integer getFileType() {

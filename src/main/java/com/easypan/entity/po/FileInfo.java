@@ -79,7 +79,7 @@ public class FileInfo implements Serializable {
 	/**
 	 * 文件分类：1:视频 2:音频 3:图片 4:文档 5:其他
 	 */
-	private Integer fileCatogary;
+	private Integer fileCategory;
 
 	/**
 	 * 1:视频 2:音频 3:图片 4:pdf 5:doc 6:excel 7:txt 8:code 9:zip 10:其他
@@ -192,12 +192,12 @@ public class FileInfo implements Serializable {
 		return this.folderType;
 	}
 
-	public void setFileCatogary(Integer fileCatogary) {
-		this.fileCatogary = fileCatogary;
+	public void setFileCategory(Integer fileCategory) {
+		this.fileCategory = fileCategory;
 	}
 
-	public Integer getFileCatogary() {
-		return this.fileCatogary;
+	public Integer getFileCategory() {
+		return this.fileCategory;
 	}
 
 	public void setFileType(Integer fileType) {
@@ -234,6 +234,7 @@ public class FileInfo implements Serializable {
 
 	@Override
 	public String toString() {
-		return "文件 ID: " + (fileId == null ? "空" : fileId) +", 用户 ID: " + (userId == null ? "空" : userId) +", 文件 MD5 值: " + (fileMd5 == null ? "空" : fileMd5) +", 父级文件（夹） ID: " + (filePid == null ? "空" : filePid) +", 文件大小（MB）: " + (fileSize == null ? "空" : fileSize) +", 文件名: " + (fileName == null ? "空" : fileName) +", 封面（图片、视频）: " + (fileCover == null ? "空" : fileCover) +", 文件路径: " + (filePath == null ? "空" : filePath) +", 创建时间: " + (createTime == null ? "空" : DateUtils.format(createTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern())) +", 最后更新时间: " + (lastUpdateTime == null ? "空" : DateUtils.format(lastUpdateTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern())) +", 0:文件 1:目录: " + (folderType == null ? "空" : folderType) +", 文件分类：1:视频 2:音频 3:图片 4:文档 5:其他: " + (fileCatogary == null ? "空" : fileCatogary) +", 1:视频 2:音频 3:图片 4:pdf 5:doc 6:excel 7:txt 8:code 9:zip 10:其他: " + (fileType == null ? "空" : fileType) +", 0:转码中 1:转码失败 2:转码成功: " + (status == null ? "空" : status) +", 进入回收站时间: " + (recoveryTime == null ? "空" : DateUtils.format(recoveryTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern())) +", 标记删除 0:删除 1:回收站 2:正常: " + (delFlag == null ? "空" : delFlag) ;
+		return "文件 ID: " + (fileId == null ? "空" : fileId) +", 用户 ID: " + (userId == null ? "空" : userId) +", 文件 MD5 值: " + (fileMd5 == null ? "空" : fileMd5) +", 父级文件（夹） ID: " + (filePid == null ? "空" : filePid) +", 文件大小（MB）: " + (fileSize == null ? "空" : fileSize) +", 文件名: " + (fileName == null ? "空" : fileName) +", 封面（图片、视频）: " + (fileCover == null ? "空" : fileCover) +", 文件路径: " + (filePath == null ? "空" : filePath) +", 创建时间: " + (createTime == null ? "空" : DateUtils.format(createTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern())) +", 最后更新时间: " + (lastUpdateTime == null ? "空" : DateUtils.format(lastUpdateTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern())) +", 0:文件 1:目录: " + (folderType == null ? "空" : folderType) +", 文件分类：1:视频 2:音频 3:图片 4:文档 5:其他: " + (
+			fileCategory == null ? "空" : fileCategory) +", 1:视频 2:音频 3:图片 4:pdf 5:doc 6:excel 7:txt 8:code 9:zip 10:其他: " + (fileType == null ? "空" : fileType) +", 0:转码中 1:转码失败 2:转码成功: " + (status == null ? "空" : status) +", 进入回收站时间: " + (recoveryTime == null ? "空" : DateUtils.format(recoveryTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern())) +", 标记删除 0:删除 1:回收站 2:正常: " + (delFlag == null ? "空" : delFlag) ;
 	}
 }

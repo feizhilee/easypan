@@ -10,13 +10,12 @@ import com.easypan.entity.query.FileInfoQuery;
 import com.easypan.entity.vo.FileInfoVO;
 import com.easypan.entity.vo.PaginationResultVO;
 import com.easypan.entity.vo.ResponseVO;
-import com.easypan.service.FileInfoService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -28,8 +27,6 @@ import javax.servlet.http.HttpSession;
 @RestController("/fileInfoController")
 @RequestMapping("/file")
 public class FileInfoController extends CommonFileController {
-    @Resource
-    private FileInfoService fileInfoService;
 
     /**
      * 根据条件分页查询
@@ -37,10 +34,10 @@ public class FileInfoController extends CommonFileController {
     @RequestMapping("/loadDataList")
     @GlobalInterceptor
     public ResponseVO loadDataList(HttpSession httpSession, FileInfoQuery query, String category) {
-        // 传过来的 category 是具体的 vedio、music、image 等名称，需要转化为数字再放进 query
-        FileCategoryEnums categoryEnums = FileCategoryEnums.getByCode(category);
-        if (categoryEnums != null) {
-            query.setFileCatogary(categoryEnums.getCategory());
+        // 传过来的 category 是具体的 video、music、image 等名称，需要转化为数字再放进 query
+        FileCategoryEnums categoryEnum = FileCategoryEnums.getByCode(category);
+        if (categoryEnum != null) {
+            query.setFileCategory(categoryEnum.getCategory());
         }
         // 用户信息
         query.setUserId(getUserInfoFromSession(httpSession).getUserId());
@@ -69,12 +66,25 @@ public class FileInfoController extends CommonFileController {
         return getSuccessResponseVO(resultDto);
     }
 
+    /**
+     * 获取缩略图
+     *
+     * @param response
+     * @param imageFolder
+     * @param imageName
+     */
     @RequestMapping("/getImage/{imageFolder}/{imageName}")
-    @GlobalInterceptor(checkParams = true)
     @Override
     public void getImage(HttpServletResponse response, @PathVariable("imageFolder") String imageFolder,
         @PathVariable("imageName") String imageName) {
         super.getImage(response, imageFolder, imageName);
+    }
+
+    @RequestMapping("/ts/getVideoInfo/{fileId}")
+    public void getVideoInfo(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+        @PathVariable("fileId") @VerifyParam(required = true) String fileId) {
+        SessionWebUserDto webUserDto = getUserInfoFromSession(session);
+        super.getFile(request, response, fileId, webUserDto.getUserId());
     }
 
 }

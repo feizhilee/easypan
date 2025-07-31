@@ -260,7 +260,7 @@ public class FileInfoServiceImpl implements FileInfoService {
             fileInfo.setFilePid(filePid);
             fileInfo.setCreateTime(curDate);
             fileInfo.setLastUpdateTime(curDate);
-            fileInfo.setFileCatogary(fileType.getCategory().getCategory());
+            fileInfo.setFileCategory(fileType.getCategory().getCategory());
             fileInfo.setFileType(fileType.getType());
             fileInfo.setStatus(FileStatusEnums.TRANSFER.getStatus());
             fileInfo.setFolderType(FileFolderTypeEnums.FILE.getType());

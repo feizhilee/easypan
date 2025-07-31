@@ -90,7 +90,7 @@ public class FileInfoQuery extends BaseQuery {
 	/**
 	 * 文件分类：1:视频 2:音频 3:图片 4:文档 5:其他
 	 */
-	private Integer fileCatogary;
+	private Integer fileCategory;
 
 	/**
 	 * 1:视频 2:音频 3:图片 4:pdf 5:doc 6:excel 7:txt 8:code 9:zip 10:其他
@@ -204,12 +204,12 @@ public class FileInfoQuery extends BaseQuery {
 		return this.folderType;
 	}
 
-	public void setFileCatogary(Integer fileCatogary) {
-		this.fileCatogary = fileCatogary;
+	public void setFileCategory(Integer fileCategory) {
+		this.fileCategory = fileCategory;
 	}
 
-	public Integer getFileCatogary() {
-		return this.fileCatogary;
+	public Integer getFileCategory() {
+		return this.fileCategory;
 	}
 
 	public void setFileType(Integer fileType) {
