@@ -42,21 +42,36 @@ public class CommonFileController extends ABaseController {
     }
 
     protected void getFile(HttpServletRequest request, HttpServletResponse response, String fileId, String userId) {
-        FileInfo fileInfo = fileInfoService.getFileInfoByFileIdAndUserId(fileId, userId);
         String filePath = null;
-        if (null == fileInfo) {
-            return;
-        }
-        // 如果是视频文件就不能直接读取文件，需要找到对应文件夹读 m3u8 索引
-        if (FileCategoryEnums.VIDEO.getCategory().equals(fileInfo.getFileCategory())) {
-            String fileNameNoSuffix = StringTools.getFileNameNoSuffix(fileInfo.getFilePath());
-            filePath =
-                appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + fileNameNoSuffix + "/" + Constants.M3U8_NAME;
-        }
+        if (fileId.endsWith(".ts")) {
+            String[] tsArray = fileId.split("_");
+            String realFileId = tsArray[0];
+            FileInfo fileInfo = fileInfoService.getFileInfoByFileIdAndUserId(realFileId, userId);
+            if (null == fileInfo) {
+                return;
+            }
+            String fileName = fileInfo.getFilePath();
+            fileName = StringTools.getFileNameNoSuffix(fileName) + "/" + fileId;
+            filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + fileName;
+        } else {
+            FileInfo fileInfo = fileInfoService.getFileInfoByFileIdAndUserId(fileId, userId);
+            if (null == fileInfo) {
+                return;
+            }
+            // 如果是视频文件就不能直接读取文件，需要找到对应文件夹读 m3u8 索引
+            if (FileCategoryEnums.VIDEO.getCategory().equals(fileInfo.getFileCategory())) {
+                String fileNameNoSuffix = StringTools.getFileNameNoSuffix(fileInfo.getFilePath());
+                filePath =
+                    appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + fileNameNoSuffix + "/" + Constants.M3U8_NAME;
+            } else {
+                // 非视频文件
+                filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + fileInfo.getFilePath();
+            }
 
-        File file = new File(filePath);
-        if (!file.exists()) {
-            return;
+            File file = new File(filePath);
+            if (!file.exists()) {
+                return;
+            }
         }
         readFile(response, filePath);
     }
