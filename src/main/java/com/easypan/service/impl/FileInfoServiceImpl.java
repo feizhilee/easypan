@@ -498,10 +498,18 @@ public class FileInfoServiceImpl implements FileInfoService {
         new File(tsPath).delete();
     }
 
+    /**
+     * 新建文件夹
+     *
+     * @param filePid
+     * @param userId
+     * @param folderName
+     * @return
+     */
     @Override
     public FileInfo newFolder(String filePid, String userId, String folderName) {
         // 校验文件夹名是否重复
-        checkFolderName(filePid, userId, folderName, FileFolderTypeEnums.FOLDER.getType());
+        checkFileName(filePid, userId, folderName, FileFolderTypeEnums.FOLDER.getType());
         Date curDate = new Date();
         FileInfo fileInfo = new FileInfo();
         fileInfo.setFilePid(filePid);
@@ -518,14 +526,14 @@ public class FileInfoServiceImpl implements FileInfoService {
     }
 
     /**
-     * 检查文件夹名称是否重复
+     * 检查文件（夹）名称是否重复
      *
      * @param filePid
      * @param userId
      * @param folderName
      * @param folderType
      */
-    private void checkFolderName(String filePid, String userId, String folderName, Integer folderType) {
+    private void checkFileName(String filePid, String userId, String folderName, Integer folderType) {
         FileInfoQuery fileInfoQuery = new FileInfoQuery();
         fileInfoQuery.setFolderType(folderType);
         fileInfoQuery.setFileName(folderName);
@@ -536,5 +544,47 @@ public class FileInfoServiceImpl implements FileInfoService {
             // 表示有重复命名的文件夹
             throw new BusinessException("此目录下已经存在同名文件夹，请修改名称");
         }
+    }
+
+    /**
+     * 文件（夹）重命名
+     *
+     * @param fileId
+     * @param userId
+     * @param fileName
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public FileInfo rename(String fileId, String userId, String fileName) {
+        FileInfo fileInfo = fileInfoMapper.selectByFileIdAndUserId(fileId, userId);
+        // 首先判断文件是否存在
+        if (fileInfo == null) {
+            throw new BusinessException("文件不存在");
+        }
+        String filePid = fileInfo.getFilePid();
+        checkFileName(filePid, userId, fileName, fileInfo.getFolderType());
+        // 获取文件后缀，因为修改名称的时候前端不允许修改后缀，所以传过来的文件名是不带后缀的
+        if (FileFolderTypeEnums.FILE.getType().equals(fileInfo.getFolderType())) {
+            fileName = fileName + StringTools.getFileSuffix(fileInfo.getFileName());
+        }
+        Date curDate = new Date();
+        FileInfo dbInfo = new FileInfo();
+        dbInfo.setFileName(fileName);
+        dbInfo.setLastUpdateTime(curDate);
+        fileInfoMapper.updateByFileIdAndUserId(dbInfo, fileId, userId);
+
+        // （并发情况下做如下操作，因为在数据库层面没有做限制，所以在程序层面做）最后操作完校验一下
+        FileInfoQuery fileInfoQuery = new FileInfoQuery();
+        fileInfoQuery.setFilePid(filePid);
+        fileInfoQuery.setUserId(userId);
+        fileInfoQuery.setFileName(fileName);
+        Integer count = fileInfoMapper.selectCount(fileInfoQuery);
+        if (count > 1) {
+            throw new BusinessException("文件名" + fileName + "已经存在");
+        }
+        fileInfo.setFileName(fileName);
+        fileInfo.setLastUpdateTime(curDate);
+        return fileInfo;
     }
 }

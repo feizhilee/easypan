@@ -78,10 +78,20 @@ public interface FileInfoService {
 
     /**
      * 新建文件夹
+     *
      * @param filePid
      * @param userId
      * @param folderName
      * @return
      */
     FileInfo newFolder(String filePid, String userId, String folderName);
+
+    /**
+     * 文件（夹）重命名
+     * @param fileId
+     * @param userId
+     * @param fileName
+     * @return
+     */
+    FileInfo rename(String fileId, String userId, String fileName);
 }
