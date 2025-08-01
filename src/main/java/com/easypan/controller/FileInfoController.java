@@ -6,11 +6,14 @@ import com.easypan.entity.dto.SessionWebUserDto;
 import com.easypan.entity.dto.UploadResultDto;
 import com.easypan.entity.enums.FileCategoryEnums;
 import com.easypan.entity.enums.FileDelFlagEnums;
+import com.easypan.entity.enums.FileFolderTypeEnums;
 import com.easypan.entity.po.FileInfo;
 import com.easypan.entity.query.FileInfoQuery;
 import com.easypan.entity.vo.FileInfoVO;
 import com.easypan.entity.vo.PaginationResultVO;
 import com.easypan.entity.vo.ResponseVO;
+import com.easypan.utils.CopyTools;
+import com.easypan.utils.StringTools;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * @Description: 文件信息Controller
@@ -135,7 +139,7 @@ public class FileInfoController extends CommonFileController {
         @VerifyParam(required = true) String fileName) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
         FileInfo fileInfo = fileInfoService.newFolder(filePid, webUserDto.getUserId(), fileName);
-        return getSuccessResponseVO(fileInfo);
+        return getSuccessResponseVO(CopyTools.copy(fileInfo, FileInfoVO.class));
     }
 
     /**
@@ -164,7 +168,49 @@ public class FileInfoController extends CommonFileController {
         @VerifyParam(required = true) String fileName) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
         FileInfo fileInfo = fileInfoService.rename(fileId, webUserDto.getUserId(), fileName);
-        return getSuccessResponseVO(fileInfo);
+        return getSuccessResponseVO(CopyTools.copy(fileInfo, FileInfoVO.class));
+    }
+
+    /**
+     * 移动文件（夹）前需要获取所有文件夹
+     *
+     * @param session
+     * @param filePid
+     * @param currentFileIds
+     * @return
+     */
+    @RequestMapping("/loadAllFolder")
+    public ResponseVO loadAllFolder(HttpSession session, @VerifyParam(required = true) String filePid,
+        String currentFileIds) {
+        SessionWebUserDto webUserDto = getUserInfoFromSession(session);
+        FileInfoQuery infoQuery = new FileInfoQuery();
+        infoQuery.setUserId(webUserDto.getUserId());
+        infoQuery.setFilePid(filePid);
+        infoQuery.setFolderType(FileFolderTypeEnums.FOLDER.getType());
+        // 排除当前选中的文件（夹）（即不加载当前选中的待移动文件夹）
+        if (!StringTools.isEmpty(currentFileIds)) {
+            infoQuery.setExcludeFileIdArray(currentFileIds.split(","));
+        }
+        infoQuery.setDelFlag(FileDelFlagEnums.USING.getFlag());
+        infoQuery.setOrderBy("create_time desc");
+        List<FileInfo> fileInfoList = fileInfoService.findListByParam(infoQuery);
+        return getSuccessResponseVO(CopyTools.copyList(fileInfoList, FileInfoVO.class));
+    }
+
+    /**
+     * 移动一个或多个文件
+     *
+     * @param session
+     * @param fileIds
+     * @param filePid 为目的文件夹，作为移动后的父 id
+     * @return
+     */
+    @RequestMapping("/changeFileFolder")
+    public ResponseVO changeFileFolder(HttpSession session, @VerifyParam(required = true) String fileIds,
+        @VerifyParam(required = true) String filePid) {
+        SessionWebUserDto webUserDto = getUserInfoFromSession(session);
+        fileInfoService.changeFileFolder(fileIds, filePid, webUserDto.getUserId());
+        return getSuccessResponseVO(null);
     }
 
 }

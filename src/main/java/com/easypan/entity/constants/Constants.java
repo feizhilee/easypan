@@ -1,6 +1,8 @@
 package com.easypan.entity.constants;
 
 public class Constants {
+    public static final String ZERO_STR = "0";
+
     public static final Integer LENGTH_5 = 5;
 
     public static final Integer LENGTH_15 = 15;

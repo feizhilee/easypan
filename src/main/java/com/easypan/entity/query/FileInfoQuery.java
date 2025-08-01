@@ -116,9 +116,14 @@ public class FileInfoQuery extends BaseQuery {
     private Integer delFlag;
 
     /**
-     * 目录路径中会含有很多 fileId
+     * 目录的路径中会含有很多 fileId
      */
     private String[] fileIdArray;
+
+    /**
+     * 表面看里面存储的数据和 fileIdArray 相同，但是在 mapper.xml 中的作用是排除 fileId
+     */
+    private String[] excludeFileIdArray;
 
     public void setFileId(String fileId) {
         this.fileId = fileId;
@@ -358,5 +363,13 @@ public class FileInfoQuery extends BaseQuery {
 
     public void setFileIdArray(String[] fileIdArray) {
         this.fileIdArray = fileIdArray;
+    }
+
+    public String[] getExcludeFileIdArray() {
+        return excludeFileIdArray;
+    }
+
+    public void setExcludeFileIdArray(String[] excludeFileIdArray) {
+        this.excludeFileIdArray = excludeFileIdArray;
     }
 }
