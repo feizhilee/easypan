@@ -60,7 +60,28 @@ public interface FileInfoService {
      */
     Integer deleteFileInfoByFileIdAndUserId(String fileId, String userId);
 
-    UploadResultDto uploadFile(SessionWebUserDto webUserDto, String fileId, MultipartFile file, String fileName, String filePid,
-        String fileMd5, Integer chunkIndex, Integer chunks);
+    /**
+     * 上传文件
+     *
+     * @param webUserDto
+     * @param fileId
+     * @param file
+     * @param fileName
+     * @param filePid
+     * @param fileMd5
+     * @param chunkIndex
+     * @param chunks
+     * @return
+     */
+    UploadResultDto uploadFile(SessionWebUserDto webUserDto, String fileId, MultipartFile file, String fileName,
+        String filePid, String fileMd5, Integer chunkIndex, Integer chunks);
 
+    /**
+     * 新建文件夹
+     * @param filePid
+     * @param userId
+     * @param folderName
+     * @return
+     */
+    FileInfo newFolder(String filePid, String userId, String folderName);
 }

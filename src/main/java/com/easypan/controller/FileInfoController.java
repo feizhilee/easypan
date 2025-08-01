@@ -6,6 +6,7 @@ import com.easypan.entity.dto.SessionWebUserDto;
 import com.easypan.entity.dto.UploadResultDto;
 import com.easypan.entity.enums.FileCategoryEnums;
 import com.easypan.entity.enums.FileDelFlagEnums;
+import com.easypan.entity.po.FileInfo;
 import com.easypan.entity.query.FileInfoQuery;
 import com.easypan.entity.vo.FileInfoVO;
 import com.easypan.entity.vo.PaginationResultVO;
@@ -53,6 +54,20 @@ public class FileInfoController extends CommonFileController {
     // 文件分片上传，后端需要告诉前端总共需要切多少片、每片大小、总大小、传到第几个分片了、最后一个分片需要告诉是最后一个，然后合并
     // fileId 非必须，比如第一个分片是没有的，只有第一个分片传到后才会分配一个 fileId
     // fileMd5 是前端做的，如果是后端做则无法实现秒传，因为后端只有当文件全部传输完毕才能计算 md5，前端本地做完 md5 一并传过去即可
+
+    /**
+     * 文件上传
+     *
+     * @param httpSession
+     * @param fileId
+     * @param file
+     * @param fileName
+     * @param filePid
+     * @param fileMd5
+     * @param chunkIndex
+     * @param chunks
+     * @return
+     */
     @RequestMapping("/uploadFile")
     @GlobalInterceptor(checkParams = true)
     public ResponseVO uploadFile(HttpSession httpSession, String fileId, MultipartFile file,
@@ -80,6 +95,14 @@ public class FileInfoController extends CommonFileController {
         super.getImage(response, imageFolder, imageName);
     }
 
+    /**
+     * 视频预览
+     *
+     * @param request
+     * @param response
+     * @param session
+     * @param fileId
+     */
     @RequestMapping("/ts/getVideoInfo/{fileId}")
     public void getVideoInfo(HttpServletRequest request, HttpServletResponse response, HttpSession session,
         @PathVariable("fileId") @VerifyParam(required = true) String fileId) {
@@ -87,10 +110,48 @@ public class FileInfoController extends CommonFileController {
         super.getFile(request, response, fileId, webUserDto.getUserId());
     }
 
+    /**
+     * 其他文件预览
+     *
+     * @param request
+     * @param response
+     * @param session
+     * @param fileId
+     */
     @RequestMapping("/getFile/{fileId}")
     public void getFile(HttpServletRequest request, HttpServletResponse response, HttpSession session,
         @PathVariable("fileId") @VerifyParam(required = true) String fileId) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
         super.getFile(request, response, fileId, webUserDto.getUserId());
     }
+
+    /**
+     * 创建新文件夹
+     *
+     * @param session
+     * @param filePid
+     * @param fileName
+     * @return
+     */
+    @RequestMapping("/newFolder")
+    public ResponseVO newFolder(HttpSession session, @VerifyParam(required = true) String filePid,
+        @VerifyParam(required = true) String fileName) {
+        SessionWebUserDto webUserDto = getUserInfoFromSession(session);
+        FileInfo fileInfo = fileInfoService.newFolder(filePid, webUserDto.getUserId(), fileName);
+        return getSuccessResponseVO(fileInfo);
+    }
+
+    /**
+     * 获取目录信息
+     *
+     * @param session
+     * @param path
+     * @return
+     */
+    @RequestMapping("/getFolderInfo")
+    public ResponseVO getFolderInfo(HttpSession session, @VerifyParam(required = true) String path) {
+        SessionWebUserDto webUserDto = getUserInfoFromSession(session);
+        return super.getFolderInfo(path, webUserDto.getUserId());
+    }
+
 }

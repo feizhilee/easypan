@@ -498,4 +498,43 @@ public class FileInfoServiceImpl implements FileInfoService {
         new File(tsPath).delete();
     }
 
+    @Override
+    public FileInfo newFolder(String filePid, String userId, String folderName) {
+        // 校验文件夹名是否重复
+        checkFolderName(filePid, userId, folderName, FileFolderTypeEnums.FOLDER.getType());
+        Date curDate = new Date();
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setFilePid(filePid);
+        fileInfo.setFileId(StringTools.getRandomString(Constants.LENGTH_10));
+        fileInfo.setUserId(userId);
+        fileInfo.setFileName(folderName);
+        fileInfo.setFolderType(FileFolderTypeEnums.FOLDER.getType());
+        fileInfo.setCreateTime(curDate);
+        fileInfo.setLastUpdateTime(curDate);
+        fileInfo.setStatus(FileStatusEnums.USING.getStatus());
+        fileInfo.setDelFlag(FileDelFlagEnums.USING.getFlag());
+        fileInfoMapper.insert(fileInfo);
+        return fileInfo;
+    }
+
+    /**
+     * 检查文件夹名称是否重复
+     *
+     * @param filePid
+     * @param userId
+     * @param folderName
+     * @param folderType
+     */
+    private void checkFolderName(String filePid, String userId, String folderName, Integer folderType) {
+        FileInfoQuery fileInfoQuery = new FileInfoQuery();
+        fileInfoQuery.setFolderType(folderType);
+        fileInfoQuery.setFileName(folderName);
+        fileInfoQuery.setUserId(userId);
+        fileInfoQuery.setFilePid(filePid);
+        Integer count = fileInfoMapper.selectCount(fileInfoQuery);
+        if (count > 0) {
+            // 表示有重复命名的文件夹
+            throw new BusinessException("此目录下已经存在同名文件夹，请修改名称");
+        }
+    }
 }
