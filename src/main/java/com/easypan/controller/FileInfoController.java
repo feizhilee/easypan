@@ -235,6 +235,14 @@ public class FileInfoController extends CommonFileController {
         return super.createDownloadUrl(fileId, webUserDto.getUserId());
     }
 
+    /**
+     * 下载文件
+     *
+     * @param request
+     * @param response
+     * @param code
+     * @throws Exception
+     */
     @RequestMapping("/download/{code}")
     @GlobalInterceptor(checkParams = true, checkLogin = false)
     @Override

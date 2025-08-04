@@ -147,6 +147,14 @@ public class CommonFileController extends ABaseController {
         return getSuccessResponseVO(code);
     }
 
+    /**
+     * 下载文件
+     *
+     * @param request
+     * @param response
+     * @param code
+     * @throws Exception
+     */
     protected void download(HttpServletRequest request, HttpServletResponse response, String code) throws Exception {
         DownloadFileDto downloadFileDto = redisComponent.getDownloadCode(code);
         if (null == downloadFileDto) {
