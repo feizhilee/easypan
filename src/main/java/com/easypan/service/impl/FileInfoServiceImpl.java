@@ -36,9 +36,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -621,8 +619,8 @@ public class FileInfoServiceImpl implements FileInfoService {
         List<FileInfo> dbFileList = this.findListByParam(query);
 
         // 目的文件夹中的所有文件转化为 Map（不转化为 Map 的话下面的循环里面还需要套一层循环）
-        Map<String, FileInfo> dbFileNameMap = dbFileList.stream().collect(
-            Collectors.toMap(FileInfo::getFileName, Function.identity(), (file1, file2) -> file2));
+        Map<String, FileInfo> dbFileNameMap = dbFileList.stream()
+            .collect(Collectors.toMap(FileInfo::getFileName, Function.identity(), (file1, file2) -> file2));
 
         // 查询选中的文件（待移动的）
         query = new FileInfoQuery();
@@ -643,4 +641,64 @@ public class FileInfoServiceImpl implements FileInfoService {
             fileInfoMapper.updateByFileIdAndUserId(updateInfo, item.getFileId(), userId);
         }
     }
+
+    /**
+     * 删除文件，即（批量）移动文件（夹）到回收站
+     *
+     * @param userId
+     * @param fileIds
+     */
+    @Override
+    public void removeFile2RecycleBatch(String userId, String fileIds) {
+        String[] fileIdArray = fileIds.split(",");
+        FileInfoQuery query = new FileInfoQuery();
+        query.setUserId(userId);
+        query.setFileIdArray(fileIdArray);
+        query.setDelFlag(FileDelFlagEnums.USING.getFlag());
+        List<FileInfo> fileInfoList = this.findListByParam(query);
+        if (fileInfoList.isEmpty()) {
+            return;
+        }
+        // 如果删除的是某个文件夹，那么需要删除其中的所有子文件及文件夹，只能使用递归
+        List<String> delFilePidList = new ArrayList<>();
+        for (FileInfo fileInfo : fileInfoList) {
+            findAllSubFolderFileList(delFilePidList, userId, fileInfo.getFileId(), FileDelFlagEnums.USING.getFlag());
+        }
+        // 如果是目录，将目标目录标记为回收站，目标目录内所有文件及子目录标记为已删除
+        if (!delFilePidList.isEmpty()) {
+            FileInfo updateInfo = new FileInfo();
+            updateInfo.setDelFlag(FileDelFlagEnums.DEL.getFlag());
+            this.fileInfoMapper.updateFileDelFlagBatch(updateInfo, userId, delFilePidList, null,
+                FileDelFlagEnums.USING.getFlag());
+        }
+        // 如果是文件，将选中的文件标记为回收站
+        List<String> delFileIdList = Arrays.asList(fileIdArray);
+        FileInfo fileInfo = new FileInfo();
+        fileInfo.setRecoveryTime(new Date());
+        fileInfo.setDelFlag(FileDelFlagEnums.RECYCLE.getFlag());
+        this.fileInfoMapper.updateFileDelFlagBatch(fileInfo, userId, null, delFileIdList,
+            FileDelFlagEnums.USING.getFlag());
+    }
+
+    /**
+     * 递归查找当前文件夹的所有子文件及文件
+     *
+     * @param fileIdList
+     * @param userId
+     * @param fileId
+     * @param delFlag
+     */
+    private void findAllSubFolderFileList(List<String> fileIdList, String userId, String fileId, Integer delFlag) {
+        fileIdList.add(fileId);
+        FileInfoQuery query = new FileInfoQuery();
+        query.setUserId(userId);
+        query.setFilePid(fileId);
+        query.setDelFlag(delFlag);
+        query.setFolderType(FileFolderTypeEnums.FOLDER.getType());
+        List<FileInfo> fileInfoList = this.findListByParam(query);
+        for (FileInfo fileInfo : fileInfoList) {
+            findAllSubFolderFileList(fileIdList, userId, fileInfo.getFileId(), delFlag);
+        }
+    }
+
 }
