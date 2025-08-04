@@ -1,13 +1,17 @@
 package com.easypan.controller;
 
+import com.easypan.component.RedisComponent;
 import com.easypan.entity.config.AppConfig;
 import com.easypan.entity.constants.Constants;
+import com.easypan.entity.dto.DownloadFileDto;
 import com.easypan.entity.enums.FileCategoryEnums;
 import com.easypan.entity.enums.FileFolderTypeEnums;
+import com.easypan.entity.enums.ResponseCodeEnum;
 import com.easypan.entity.po.FileInfo;
 import com.easypan.entity.query.FileInfoQuery;
 import com.easypan.entity.vo.FileInfoVO;
 import com.easypan.entity.vo.ResponseVO;
+import com.easypan.exception.BusinessException;
 import com.easypan.service.FileInfoService;
 import com.easypan.utils.CopyTools;
 import com.easypan.utils.StringTools;
@@ -17,6 +21,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.net.URLEncoder;
 import java.util.List;
 
 public class CommonFileController extends ABaseController {
@@ -25,6 +30,9 @@ public class CommonFileController extends ABaseController {
 
     @Resource
     protected FileInfoService fileInfoService;
+
+    @Resource
+    protected RedisComponent redisComponent;
 
     /**
      * 返回缩略图
@@ -97,7 +105,7 @@ public class CommonFileController extends ABaseController {
      * @param userId
      * @return
      */
-    public ResponseVO getFolderInfo(String path, String userId) {
+    protected ResponseVO getFolderInfo(String path, String userId) {
         // 另一种方法是通过递归查询 path，但是递归查询数据库效率太低了，因此使用数组
         // 传进来的 path 是一大串，需要进行分割
         String[] pathArray = path.split("/");
@@ -111,4 +119,51 @@ public class CommonFileController extends ABaseController {
         List<FileInfo> fileInfoList = fileInfoService.findListByParam(infoQuery);
         return getSuccessResponseVO(CopyTools.copyList(fileInfoList, FileInfoVO.class));
     }
+
+    /**
+     * 创建下载链接，普通用户下载、分享，超级管理员查看用户文件都会用到，所以提取出来
+     *
+     * @param fileId
+     * @param userId
+     * @return
+     */
+    protected ResponseVO createDownloadUrl(String fileId, String userId) {
+        FileInfo fileInfo = fileInfoService.getFileInfoByFileIdAndUserId(fileId, userId);
+        if (null == fileInfo) {
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
+        }
+        // 不允许下载目录
+        if (FileFolderTypeEnums.FOLDER.getType().equals(fileInfo.getFileCategory())) {
+            throw new BusinessException(ResponseCodeEnum.CODE_600);
+        }
+        String code = StringTools.getRandomString(Constants.LENGTH_50);
+        // 需要存入 redis，code 返回给前端
+        DownloadFileDto fileDto = new DownloadFileDto();
+        fileDto.setDownloadCode(code);
+        fileDto.setFilePath(fileInfo.getFilePath());
+        fileDto.setFileName(fileInfo.getFileName());
+        redisComponent.saveDownloadCode(code, fileDto);
+        // 前端只需要 code
+        return getSuccessResponseVO(code);
+    }
+
+    protected void download(HttpServletRequest request, HttpServletResponse response, String code) throws Exception {
+        DownloadFileDto downloadFileDto = redisComponent.getDownloadCode(code);
+        if (null == downloadFileDto) {
+            return;
+        }
+        String filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + downloadFileDto.getFilePath();
+        String fileName = downloadFileDto.getFileName();
+        response.setContentType("application/x-msdownload; charset=UTF-8");
+        if (request.getHeader("User-Agent").toLowerCase().indexOf("msie") > 0) {
+            // IE浏览器
+            fileName = URLEncoder.encode(fileName, "UTF-8");
+        } else {
+            fileName = new String(fileName.getBytes("UTF-8"), "ISO8859-1");
+        }
+        // 响应头不同，这个响应头是下载的，前面的默认是 “inline” 预览
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + "\"");
+        readFile(response, filePath);
+    }
+
 }

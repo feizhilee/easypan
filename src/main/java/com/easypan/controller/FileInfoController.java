@@ -105,6 +105,7 @@ public class FileInfoController extends CommonFileController {
      * @param fileId
      */
     @RequestMapping("/ts/getVideoInfo/{fileId}")
+    @GlobalInterceptor(checkParams = true)
     public void getVideoInfo(HttpServletRequest request, HttpServletResponse response, HttpSession session,
         @PathVariable("fileId") @VerifyParam(required = true) String fileId) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
@@ -120,6 +121,7 @@ public class FileInfoController extends CommonFileController {
      * @param fileId
      */
     @RequestMapping("/getFile/{fileId}")
+    @GlobalInterceptor(checkParams = true)
     public void getFile(HttpServletRequest request, HttpServletResponse response, HttpSession session,
         @PathVariable("fileId") @VerifyParam(required = true) String fileId) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
@@ -135,6 +137,7 @@ public class FileInfoController extends CommonFileController {
      * @return
      */
     @RequestMapping("/newFolder")
+    @GlobalInterceptor(checkParams = true)
     public ResponseVO newFolder(HttpSession session, @VerifyParam(required = true) String filePid,
         @VerifyParam(required = true) String fileName) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
@@ -150,6 +153,7 @@ public class FileInfoController extends CommonFileController {
      * @return
      */
     @RequestMapping("/getFolderInfo")
+    @GlobalInterceptor(checkParams = true)
     public ResponseVO getFolderInfo(HttpSession session, @VerifyParam(required = true) String path) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
         return super.getFolderInfo(path, webUserDto.getUserId());
@@ -164,6 +168,7 @@ public class FileInfoController extends CommonFileController {
      * @return
      */
     @RequestMapping("/rename")
+    @GlobalInterceptor(checkParams = true)
     public ResponseVO rename(HttpSession session, @VerifyParam(required = true) String fileId,
         @VerifyParam(required = true) String fileName) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
@@ -180,6 +185,7 @@ public class FileInfoController extends CommonFileController {
      * @return
      */
     @RequestMapping("/loadAllFolder")
+    @GlobalInterceptor(checkParams = true)
     public ResponseVO loadAllFolder(HttpSession session, @VerifyParam(required = true) String filePid,
         String currentFileIds) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
@@ -206,11 +212,35 @@ public class FileInfoController extends CommonFileController {
      * @return
      */
     @RequestMapping("/changeFileFolder")
+    @GlobalInterceptor(checkParams = true)
     public ResponseVO changeFileFolder(HttpSession session, @VerifyParam(required = true) String fileIds,
         @VerifyParam(required = true) String filePid) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
         fileInfoService.changeFileFolder(fileIds, filePid, webUserDto.getUserId());
         return getSuccessResponseVO(null);
+    }
+
+    /**
+     * 创建下载链接，下载文件前需要有下载链接，下载文件本身不需要校验登陆，但是链接需要，code 具有实效性
+     *
+     * @param session
+     * @param fileId
+     * @return
+     */
+    @RequestMapping("/createDownloadUrl/{fileId}")
+    @GlobalInterceptor(checkParams = true)
+    public ResponseVO createDownloadUrl(HttpSession session,
+        @VerifyParam(required = true) @PathVariable("fileId") String fileId) {
+        SessionWebUserDto webUserDto = getUserInfoFromSession(session);
+        return super.createDownloadUrl(fileId, webUserDto.getUserId());
+    }
+
+    @RequestMapping("/download/{code}")
+    @GlobalInterceptor(checkParams = true, checkLogin = false)
+    @Override
+    public void download(HttpServletRequest request, HttpServletResponse response,
+        @VerifyParam(required = true) @PathVariable("code") String code) throws Exception {
+        super.download(request, response, code);
     }
 
 }

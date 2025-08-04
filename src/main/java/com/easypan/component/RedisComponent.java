@@ -1,6 +1,7 @@
 package com.easypan.component;
 
 import com.easypan.entity.constants.Constants;
+import com.easypan.entity.dto.DownloadFileDto;
 import com.easypan.entity.dto.SysSettingsDto;
 import com.easypan.entity.dto.UserSpaceDto;
 import com.easypan.entity.po.FileInfo;
@@ -97,7 +98,7 @@ public class RedisComponent {
         return currentSize;
     }
 
-    public Long getFileSizeFromRedis(String key) {
+    private Long getFileSizeFromRedis(String key) {
         Object sizeObj = redisUtils.get(key);
         if (sizeObj == null) {
             return 0L;
@@ -110,4 +111,23 @@ public class RedisComponent {
         return 0L;
     }
 
+    /**
+     * 下载文件信息保存到 redis
+     *
+     * @param code
+     * @param downloadFileDto
+     */
+    public void saveDownloadCode(String code, DownloadFileDto downloadFileDto) {
+        redisUtils.setex(Constants.REDIS_KEY_DOWNLOAD + code, downloadFileDto, Constants.REDIS_KEY_EXPIRES_FIVE_MIN);
+    }
+
+    /**
+     * 从 redis 中获取下载文件信息
+     *
+     * @param code
+     * @return
+     */
+    public DownloadFileDto getDownloadCode(String code) {
+        return (DownloadFileDto)redisUtils.get(Constants.REDIS_KEY_DOWNLOAD + code);
+    }
 }
