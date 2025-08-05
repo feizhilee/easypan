@@ -253,6 +253,7 @@ public class FileInfoController extends CommonFileController {
 
     /**
      * 删除文件（放入回收站）
+     *
      * @param session
      * @param fileIds
      * @return
