@@ -16,10 +16,18 @@ import javax.servlet.http.HttpSession;
 
 @RestController("/RecycleController")
 @RequestMapping("/recycle")
-public class RecycleController extends ABaseController{
+public class RecycleController extends ABaseController {
     @Resource
     private FileInfoService fileInfoService;
 
+    /**
+     * 加载回收站列表
+     *
+     * @param session
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
     @RequestMapping("/loadRecycleList")
     @GlobalInterceptor
     public ResponseVO loadRecycleList(HttpSession session, Integer pageNo, Integer pageSize) {
@@ -33,6 +41,13 @@ public class RecycleController extends ABaseController{
         return getSuccessResponseVO(result);
     }
 
+    /**
+     * 回收站恢复文件
+     *
+     * @param session
+     * @param fileIds
+     * @return
+     */
     @RequestMapping("/recoverFile")
     @GlobalInterceptor(checkParams = true)
     public ResponseVO recoverFile(HttpSession session, @VerifyParam(required = true) String fileIds) {
