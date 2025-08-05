@@ -121,4 +121,12 @@ public interface FileInfoService {
      */
     void recoverFileBatch(String userId, String fileIds);
 
+    /**
+     * 彻底删除文件
+     *
+     * @param userId
+     * @param fileIds
+     * @param adminOp
+     */
+    void delFileBatch(String userId, String fileIds, Boolean adminOp);
 }

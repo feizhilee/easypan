@@ -56,4 +56,19 @@ public class RecycleController extends ABaseController {
         return getSuccessResponseVO(null);
     }
 
+    /**
+     * 彻底（批量）删除文件
+     *
+     * @param session
+     * @param fileIds
+     * @return
+     */
+    @RequestMapping("/delFile")
+    @GlobalInterceptor(checkParams = true)
+    public ResponseVO delFile(HttpSession session, @VerifyParam(required = true) String fileIds) {
+        SessionWebUserDto webUserDto = getUserInfoFromSession(session);
+        fileInfoService.delFileBatch(webUserDto.getUserId(), fileIds, false);
+        return getSuccessResponseVO(null);
+    }
+
 }

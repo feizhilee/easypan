@@ -540,6 +540,8 @@ public class FileInfoServiceImpl implements FileInfoService {
         fileInfoQuery.setFileName(folderName);
         fileInfoQuery.setUserId(userId);
         fileInfoQuery.setFilePid(filePid);
+        // 排除回收站中的
+        fileInfoQuery.setDelFlag(FileDelFlagEnums.USING.getFlag());
         Integer count = fileInfoMapper.selectCount(fileInfoQuery);
         if (count > 0) {
             // 表示有重复命名的文件夹
@@ -580,6 +582,8 @@ public class FileInfoServiceImpl implements FileInfoService {
         fileInfoQuery.setFilePid(filePid);
         fileInfoQuery.setUserId(userId);
         fileInfoQuery.setFileName(fileName);
+        // 应当排除回收站的文件
+        fileInfoQuery.setDelFlag(FileDelFlagEnums.USING.getFlag());
         Integer count = fileInfoMapper.selectCount(fileInfoQuery);
         if (count > 1) {
             throw new BusinessException("文件名" + fileName + "已经存在");
@@ -744,6 +748,52 @@ public class FileInfoServiceImpl implements FileInfoService {
                 this.fileInfoMapper.updateByFileIdAndUserId(updateInfo, item.getFileId(), userId);
             }
         }
+    }
+
+    /**
+     * 彻底（批量）删除文件
+     *
+     * @param userId
+     * @param fileIds
+     * @param adminOp
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void delFileBatch(String userId, String fileIds, Boolean adminOp) {
+        String[] fileIdArray = fileIds.split(",");
+        FileInfoQuery query = new FileInfoQuery();
+        query.setUserId(userId);
+        query.setFileIdArray(fileIdArray);
+        query.setDelFlag(FileDelFlagEnums.RECYCLE.getFlag());
+        List<FileInfo> fileInfoList = this.findListByParam(query);
+
+        List<String> delFileSubFolderFileIdList = new ArrayList<>();
+        // 找到所选文件子目录文件 ID
+        for (FileInfo fileInfo : fileInfoList) {
+            if (FileFolderTypeEnums.FOLDER.getType().equals(fileInfo.getFolderType())) {
+                findAllSubFolderFileList(delFileSubFolderFileIdList, userId, fileInfo.getFileId(),
+                    FileDelFlagEnums.DEL.getFlag());
+            }
+        }
+        // 删除所有所选文件夹子目录中的文件
+        if (!delFileSubFolderFileIdList.isEmpty()) {
+            this.fileInfoMapper.delFileBatch(userId, delFileSubFolderFileIdList, null, adminOp ? null :
+                FileDelFlagEnums.DEL.getFlag());
+        }
+        // 删除所选文件
+        this.fileInfoMapper.delFileBatch(userId, null, Arrays.asList(fileIdArray), adminOp ? null :
+            FileDelFlagEnums.RECYCLE.getFlag());
+
+        // 更新用户使用空间
+        Long useSpace = this.fileInfoMapper.selectUseSpace(userId);
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUseSpace(useSpace);
+        this.userInfoMapper.updateByUserId(userInfo, userId);
+
+        // 更新缓存
+        UserSpaceDto userSpaceDto = redisComponent.getUserSpaceUse(userId);
+        userSpaceDto.setUseSpace(useSpace);
+        redisComponent.saveUserSpaceUse(userId, userSpaceDto);
     }
 
     /**
