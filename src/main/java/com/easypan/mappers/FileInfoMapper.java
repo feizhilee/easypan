@@ -70,4 +70,10 @@ public interface FileInfoMapper<T, P> extends BaseMapper {
     void delFileBatch(@Param("userId") String userId, @Param("filePidList") List<String> filePidList,
         @Param("fileIdList") List<String> fileIdList, @Param("oldDelFlag") Integer oldDelFlag);
 
+    /**
+     * 禁用用户时需要删除其中所有文件
+     *
+     * @param userId
+     */
+    void deleteFilesByUserId(@Param("userId") String userId);
 }

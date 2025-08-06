@@ -133,7 +133,24 @@ public interface UserInfoService {
 
     /**
      * QQ 登录
+     *
      * @param code：QQ 登录回调传过来的
      */
     SessionWebUserDto qqLogin(String code);
+
+    /**
+     * 更新用户状态
+     *
+     * @param userId
+     * @param status
+     */
+    void updateUserStatus(String userId, Integer status);
+
+    /**
+     * 修改用户空间
+     *
+     * @param userId
+     * @param changeSpace
+     */
+    void changeUserSpace(String userId, Integer changeSpace);
 }

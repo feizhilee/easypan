@@ -10,7 +10,7 @@ public class SysSettingsDto implements Serializable {
     /**
      * 注册发送邮件标题
      */
-    private String registerMailTitle = "邮箱验证码";
+    private String registerEmailTitle = "邮箱验证码";
 
     /**
      * 注册发送邮件内容
@@ -22,12 +22,12 @@ public class SysSettingsDto implements Serializable {
      */
     private Integer userInitUseSpace = 5;
 
-    public String getRegisterMailTitle() {
-        return registerMailTitle;
+    public String getRegisterEmailTitle() {
+        return registerEmailTitle;
     }
 
-    public void setRegisterMailTitle(String registerMailTitle) {
-        this.registerMailTitle = registerMailTitle;
+    public void setRegisterEmailTitle(String registerEmailTitle) {
+        this.registerEmailTitle = registerEmailTitle;
     }
 
     public String getRegisterMailContent() {

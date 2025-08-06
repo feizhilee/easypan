@@ -385,6 +385,38 @@ public class UserInfoServiceImpl implements UserInfoService {
         return sessionWebUserDto;
     }
 
+    /**
+     * 更新用户状态
+     *
+     * @param userId
+     * @param status
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserStatus(String userId, Integer status) {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setStatus(status);
+        if (UserStatusEnum.DISABLE.getStatus().equals(status)) {
+            // 禁用用户需要把空间以及所有文件删除
+            userInfo.setUseSpace(0L);
+            fileInfoMapper.deleteFilesByUserId(userId);
+        }
+        userInfoMapper.updateByUserId(userInfo, userId);
+    }
+
+    /**
+     * 修改用户空间
+     *
+     * @param userId
+     * @param changeSpace
+     */
+    @Override
+    public void changeUserSpace(String userId, Integer changeSpace) {
+        Long space = changeSpace * Constants.MB;
+        this.userInfoMapper.updateUserSpace(userId, null, space);
+        redisComponent.resetUserSpaceUse(userId);
+    }
+
     private String getQQAccessToken(String code) {
         /**
          * 返回结果是字符串 access_token=*&expires_in=7776000&refresh_token=* 返回错误 callback({UcWebConstants

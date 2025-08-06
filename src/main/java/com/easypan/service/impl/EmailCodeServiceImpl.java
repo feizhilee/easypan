@@ -190,7 +190,7 @@ public class EmailCodeServiceImpl implements EmailCodeService {
             mimeMessageHelper.setTo(toEmail);
             SysSettingsDto sysSettingsDto = redisComponent.getSysSettingsDto();
             // 设置邮件标题
-            mimeMessageHelper.setSubject(sysSettingsDto.getRegisterMailTitle());
+            mimeMessageHelper.setSubject(sysSettingsDto.getRegisterEmailTitle());
             // 设置邮件内容
             mimeMessageHelper.setText(String.format(sysSettingsDto.getRegisterMailContent(), code));
             // 发送日期

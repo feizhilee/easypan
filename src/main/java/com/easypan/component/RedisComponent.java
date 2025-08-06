@@ -46,6 +46,15 @@ public class RedisComponent {
     }
 
     /**
+     * 管理员用来保存设置
+     *
+     * @param sysSettingsDto
+     */
+    public void saveSysSettingsDto(SysSettingsDto sysSettingsDto) {
+        redisUtils.set(Constants.REDIS_KEY_SYS_SETTING, sysSettingsDto);
+    }
+
+    /**
      * 用户登录后设置到缓存区，为什么需要这样？因为需要实时显示出登录账号的某些信息，
      *
      * @param userId
@@ -53,6 +62,22 @@ public class RedisComponent {
      */
     public void saveUserSpaceUse(String userId, UserSpaceDto userSpaceDto) {
         redisUtils.setex(Constants.REDIS_KEY_USER_SPACE_USE + userId, userSpaceDto, Constants.REDIS_KEY_EXPIRES_DAY);
+    }
+
+    /**
+     * 刷新用户使用和总空间
+     *
+     * @param userId
+     * @return
+     */
+    public UserSpaceDto resetUserSpaceUse(String userId) {
+        UserSpaceDto userSpaceDto = new UserSpaceDto();
+        Long userSpace = this.fileInfoMapper.selectUseSpace(userId);
+        userSpaceDto.setUseSpace(userSpace);
+        UserInfo userInfo = this.userInfoMapper.selectByUserId(userId);
+        userSpaceDto.setTotalSpace(userInfo.getTotalSpace());
+        redisUtils.setex(Constants.REDIS_KEY_USER_SPACE_USE + userId, userSpaceDto, Constants.REDIS_KEY_EXPIRES_DAY);
+        return userSpaceDto;
     }
 
     /**

@@ -111,7 +111,7 @@
             , f.file_name, f.folder_type, f.file_category, f.file_type, f.file_cover
         </if>
         FROM file_share s
-        # 联合查询
+        # 查询的东西很多，所以联合查询
         <if test="query.queryFileName != null and query.queryFileName">
             left join file_info f on s.file_id = f.file_id and f.user_id = #{query.userId}
         </if>
