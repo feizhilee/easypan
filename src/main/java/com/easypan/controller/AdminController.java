@@ -11,14 +11,17 @@ import com.easypan.entity.vo.ResponseVO;
 import com.easypan.entity.vo.UserInfoVO;
 import com.easypan.service.FileInfoService;
 import com.easypan.service.UserInfoService;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController("/adminController")
 @RequestMapping("/admin")
-public class AdminController extends ABaseController {
+public class AdminController extends CommonFileController {
     @Resource
     private FileInfoService fileInfoService;
 
@@ -104,6 +107,12 @@ public class AdminController extends ABaseController {
         return getSuccessResponseVO(null);
     }
 
+    /**
+     * 管理员加载所有文件列表
+     *
+     * @param query
+     * @return
+     */
     @RequestMapping("/loadFileList")
     @GlobalInterceptor(checkParams = true, checkAdmin = true)
     public ResponseVO loadFileList(FileInfoQuery query) {
@@ -112,6 +121,94 @@ public class AdminController extends ABaseController {
         query.setQueryNickName(true);
         PaginationResultVO result = fileInfoService.findListByPage(query);
         return getSuccessResponseVO(result);
+    }
+
+    /**
+     * 获取文件夹信息，用于加载路径
+     *
+     * @param path
+     * @return
+     */
+    @RequestMapping("/getFolderInfo")
+    @GlobalInterceptor(checkLogin = false, checkParams = true, checkAdmin = true)
+    public ResponseVO getFolderInfo(@VerifyParam(required = true) String path) {
+        return super.getFolderInfo(path, null);
+    }
+
+    /**
+     * 其他文件预览
+     *
+     * @param response
+     * @param fileId
+     */
+    @RequestMapping("/getFile/{userId}/{fileId}")
+    @GlobalInterceptor(checkParams = true, checkAdmin = true)
+    public void getFile(HttpServletResponse response,
+        @PathVariable("userId") @VerifyParam(required = true) String userId,
+        @PathVariable("fileId") @VerifyParam(required = true) String fileId) {
+        super.getFile(response, fileId, userId);
+    }
+
+    /**
+     * 视频文件预览
+     *
+     * @param response
+     * @param userId
+     * @param fileId
+     */
+    @RequestMapping("/ts/getVideoInfo/{userId}/{fileId}")
+    @GlobalInterceptor(checkParams = true, checkAdmin = true)
+    public void getVideoInfo(HttpServletRequest request, HttpServletResponse response,
+        @PathVariable("userId") @VerifyParam(required = true) String userId,
+        @PathVariable("fileId") @VerifyParam(required = true) String fileId) {
+        super.getFile(response, fileId, userId);
+    }
+
+    /**
+     * 创建下载链接
+     *
+     * @param userId
+     * @param fileId
+     * @return
+     */
+    @RequestMapping("/createDownloadUrl/{userId}/{fileId}")
+    @GlobalInterceptor(checkParams = true, checkAdmin = true)
+    public ResponseVO createDownloadUrl(@PathVariable("userId") @VerifyParam(required = true) String userId,
+        @VerifyParam(required = true) @PathVariable("fileId") String fileId) {
+        return super.createDownloadUrl(fileId, userId);
+    }
+
+    /**
+     * 下载
+     *
+     * @param request
+     * @param response
+     * @param code
+     * @throws Exception
+     */
+    @RequestMapping("/download/{code}")
+    @GlobalInterceptor(checkParams = true, checkLogin = false)
+    @Override
+    public void download(HttpServletRequest request, HttpServletResponse response,
+        @VerifyParam(required = true) @PathVariable("code") String code) throws Exception {
+        super.download(request, response, code);
+    }
+
+    /**
+     * 删除文件，管理员删除直接删除即可
+     *
+     * @param fileIdAndUserIds，每一对用 "," 分割，每一对中 fileId 和 UserId 用 "_" 分割
+     * @return
+     */
+    @RequestMapping("/delFile")
+    @GlobalInterceptor(checkParams = true, checkAdmin = true)
+    public ResponseVO delFile(@VerifyParam(required = true) String fileIdAndUserIds) {
+        String[] fileAndUserIdArray = fileIdAndUserIds.split(",");
+        for (String fileIdAndUserId : fileAndUserIdArray) {
+            String[] itemArray = fileIdAndUserId.split("_");
+            fileInfoService.delFileBatch(itemArray[0], itemArray[1], true);
+        }
+        return getSuccessResponseVO(null);
     }
 
 }

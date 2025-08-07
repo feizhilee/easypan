@@ -99,33 +99,31 @@ public class FileInfoController extends CommonFileController {
     /**
      * 视频预览
      *
-     * @param request
      * @param response
      * @param session
      * @param fileId
      */
     @RequestMapping("/ts/getVideoInfo/{fileId}")
     @GlobalInterceptor(checkParams = true)
-    public void getVideoInfo(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+    public void getVideoInfo(HttpServletResponse response, HttpSession session,
         @PathVariable("fileId") @VerifyParam(required = true) String fileId) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
-        super.getFile(request, response, fileId, webUserDto.getUserId());
+        super.getFile(response, fileId, webUserDto.getUserId());
     }
 
     /**
      * 其他文件预览
      *
-     * @param request
      * @param response
      * @param session
      * @param fileId
      */
     @RequestMapping("/getFile/{fileId}")
     @GlobalInterceptor(checkParams = true)
-    public void getFile(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+    public void getFile(HttpServletResponse response, HttpSession session,
         @PathVariable("fileId") @VerifyParam(required = true) String fileId) {
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
-        super.getFile(request, response, fileId, webUserDto.getUserId());
+        super.getFile(response, fileId, webUserDto.getUserId());
     }
 
     /**

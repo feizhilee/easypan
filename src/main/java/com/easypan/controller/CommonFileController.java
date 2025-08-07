@@ -6,10 +6,11 @@ import com.easypan.entity.constants.Constants;
 import com.easypan.entity.dto.DownloadFileDto;
 import com.easypan.entity.enums.FileCategoryEnums;
 import com.easypan.entity.enums.FileFolderTypeEnums;
+import com.easypan.entity.enums.FileTypeEnums;
 import com.easypan.entity.enums.ResponseCodeEnum;
 import com.easypan.entity.po.FileInfo;
 import com.easypan.entity.query.FileInfoQuery;
-import com.easypan.entity.vo.FileInfoVO;
+import com.easypan.entity.vo.FolderVo;
 import com.easypan.entity.vo.ResponseVO;
 import com.easypan.exception.BusinessException;
 import com.easypan.service.FileInfoService;
@@ -58,19 +59,36 @@ public class CommonFileController extends ABaseController {
     /**
      * 文件预览获取文件
      *
-     * @param request
      * @param response
      * @param fileId
      * @param userId
      */
-    protected void getFile(HttpServletRequest request, HttpServletResponse response, String fileId, String userId) {
+    protected void getFile(HttpServletResponse response, String fileId, String userId) {
         String filePath = null;
+        FileTypeEnums fileTypeEnums = null;
         if (fileId.endsWith(".ts")) {
             String[] tsArray = fileId.split("_");
             String realFileId = tsArray[0];
+            // 根据原文件的 id 查询出一个文件集合
             FileInfo fileInfo = fileInfoService.getFileInfoByFileIdAndUserId(realFileId, userId);
             if (null == fileInfo) {
-                return;
+                // 分享的视频，ts路径记录的是原视频的 id，这里通过 id 直接取出原视频
+                FileInfoQuery fileInfoQuery = new FileInfoQuery();
+                fileInfoQuery.setFileId(realFileId);
+                List<FileInfo> fileInfoList = fileInfoService.findListByParam(fileInfoQuery);
+                fileInfo = fileInfoList.get(0);
+                if (fileInfo == null) {
+                    return;
+                }
+
+                // 根据当前用户 id 和路径去查询当前用户是否有该文件，如果没有直接返回
+                fileInfoQuery = new FileInfoQuery();
+                fileInfoQuery.setFilePath(fileInfo.getFilePath());
+                fileInfoQuery.setUserId(userId);
+                Integer count = fileInfoService.findCountByParam(fileInfoQuery);
+                if (count == 0) {
+                    return;
+                }
             }
             String fileName = fileInfo.getFilePath();
             fileName = StringTools.getFileNameNoSuffix(fileName) + "/" + fileId;
@@ -117,7 +135,7 @@ public class CommonFileController extends ABaseController {
         String orderBy = "field(file_id, \"" + StringUtils.join(pathArray, "\", \"") + "\")";
         infoQuery.setOrderBy(orderBy);
         List<FileInfo> fileInfoList = fileInfoService.findListByParam(infoQuery);
-        return getSuccessResponseVO(CopyTools.copyList(fileInfoList, FileInfoVO.class));
+        return getSuccessResponseVO(CopyTools.copyList(fileInfoList, FolderVo.class));
     }
 
     /**
