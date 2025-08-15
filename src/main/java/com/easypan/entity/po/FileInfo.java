@@ -3,7 +3,6 @@ package com.easypan.entity.po;
 import com.easypan.entity.enums.DateTimePatternEnum;
 import com.easypan.utils.DateUtils;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
@@ -88,7 +87,6 @@ public class FileInfo implements Serializable {
     /**
      * 0:转码中 1:转码失败 2:转码成功
      */
-    @JsonIgnore
     private Integer status;
 
     /**
