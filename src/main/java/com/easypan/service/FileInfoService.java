@@ -129,4 +129,25 @@ public interface FileInfoService {
      * @param adminOp
      */
     void delFileBatch(String userId, String fileIds, Boolean adminOp);
+
+    /**
+     * 保证不能越权，例如分享某个目录，不能查看到其他目录
+     *
+     * @param rootFilePid
+     * @param userId
+     * @param fileId
+     */
+    void checkRootFilePid(String rootFilePid, String userId, String fileId);
+
+    /**
+     * 保存分享
+     *
+     * @param shareRootFilePid
+     * @param shareFileIds
+     * @param myFolderId
+     * @param shareUserId
+     * @param currentUserId
+     */
+    void saveShare(String shareRootFilePid, String shareFileIds, String myFolderId, String shareUserId,
+        String currentUserId);
 }

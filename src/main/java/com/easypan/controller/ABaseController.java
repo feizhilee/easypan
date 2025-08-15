@@ -1,11 +1,11 @@
 package com.easypan.controller;
 
 import com.easypan.entity.constants.Constants;
+import com.easypan.entity.dto.SessionShareDto;
 import com.easypan.entity.dto.SessionWebUserDto;
 import com.easypan.entity.enums.ResponseCodeEnum;
 import com.easypan.entity.vo.PaginationResultVO;
 import com.easypan.entity.vo.ResponseVO;
-import com.easypan.exception.BusinessException;
 import com.easypan.utils.CopyTools;
 import com.easypan.utils.StringTools;
 import org.slf4j.Logger;
@@ -32,28 +32,6 @@ public class ABaseController {
         responseVO.setInfo(ResponseCodeEnum.CODE_200.getMsg());
         responseVO.setData(t);
         return responseVO;
-    }
-
-    protected <T> ResponseVO getBusinessErrorResponseVO(BusinessException e, T t) {
-        ResponseVO vo = new ResponseVO();
-        vo.setStatus(STATUS_ERROR);
-        if (e.getCode() == null) {
-            vo.setCode(ResponseCodeEnum.CODE_600.getCode());
-        } else {
-            vo.setCode(e.getCode());
-        }
-        vo.setInfo(e.getMessage());
-        vo.setData(t);
-        return vo;
-    }
-
-    protected <T> ResponseVO getServerErrorResponseVO(T t) {
-        ResponseVO vo = new ResponseVO();
-        vo.setStatus(STATUS_ERROR);
-        vo.setCode(ResponseCodeEnum.CODE_500.getCode());
-        vo.setInfo(ResponseCodeEnum.CODE_500.getMsg());
-        vo.setData(t);
-        return vo;
     }
 
     protected <S, T> PaginationResultVO<T> convert2PaginationVO(PaginationResultVO<S> result, Class<T> classz) {
@@ -108,5 +86,10 @@ public class ABaseController {
     public SessionWebUserDto getUserInfoFromSession(HttpSession session) {
         SessionWebUserDto sessionWebUserDto = (SessionWebUserDto)session.getAttribute(Constants.SESSION_KEY);
         return sessionWebUserDto;
+    }
+
+    public SessionShareDto getSessionShareFromSession(HttpSession session, String shareId) {
+        SessionShareDto sessionShareDto = (SessionShareDto)session.getAttribute(Constants.SESSION_SHARE_KEY + shareId);
+        return sessionShareDto;
     }
 }

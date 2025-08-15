@@ -192,7 +192,7 @@ public class EmailCodeServiceImpl implements EmailCodeService {
             // 设置邮件标题
             mimeMessageHelper.setSubject(sysSettingsDto.getRegisterEmailTitle());
             // 设置邮件内容
-            mimeMessageHelper.setText(String.format(sysSettingsDto.getRegisterMailContent(), code));
+            mimeMessageHelper.setText(String.format(sysSettingsDto.getRegisterEmailContent(), code));
             // 发送日期
             mimeMessageHelper.setSentDate(new Date());
             // 发送

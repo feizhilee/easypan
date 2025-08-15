@@ -4,6 +4,7 @@ import com.easypan.annotation.GlobalInterceptor;
 import com.easypan.annotation.VerifyParam;
 import com.easypan.component.RedisComponent;
 import com.easypan.entity.dto.SysSettingsDto;
+import com.easypan.entity.enums.FileDelFlagEnums;
 import com.easypan.entity.query.FileInfoQuery;
 import com.easypan.entity.query.UserInfoQuery;
 import com.easypan.entity.vo.PaginationResultVO;
@@ -46,18 +47,18 @@ public class AdminController extends CommonFileController {
      * 保存系统设置
      *
      * @param registerEmailTitle
-     * @param registerMailContent
+     * @param registerEmailContent
      * @param userInitUseSpace
      * @return
      */
     @RequestMapping("/saveSysSettings")
     @GlobalInterceptor(checkParams = true, checkAdmin = true)
     public ResponseVO saveSysSettings(@VerifyParam(required = true) String registerEmailTitle,
-        @VerifyParam(required = true) String registerMailContent,
+        @VerifyParam(required = true) String registerEmailContent,
         @VerifyParam(required = true) Integer userInitUseSpace) {
         SysSettingsDto sysSettingsDto = new SysSettingsDto();
         sysSettingsDto.setRegisterEmailTitle(registerEmailTitle);
-        sysSettingsDto.setRegisterMailContent(registerMailContent);
+        sysSettingsDto.setRegisterEmailContent(registerEmailContent);
         sysSettingsDto.setUserInitUseSpace(userInitUseSpace);
         redisComponent.saveSysSettingsDto(sysSettingsDto);
         return getSuccessResponseVO(null);
@@ -115,12 +116,12 @@ public class AdminController extends CommonFileController {
      */
     @RequestMapping("/loadFileList")
     @GlobalInterceptor(checkParams = true, checkAdmin = true)
-    public ResponseVO loadFileList(FileInfoQuery query) {
+    public ResponseVO loadDataList(FileInfoQuery query) {
         query.setOrderBy("last_update_time desc");
-        // 需要显示发布人，关联查询
         query.setQueryNickName(true);
-        PaginationResultVO result = fileInfoService.findListByPage(query);
-        return getSuccessResponseVO(result);
+        query.setDelFlag(FileDelFlagEnums.USING.getFlag());
+        PaginationResultVO resultVO = fileInfoService.findListByPage(query);
+        return getSuccessResponseVO(resultVO);
     }
 
     /**
@@ -150,7 +151,7 @@ public class AdminController extends CommonFileController {
     }
 
     /**
-     * 视频文件预览
+     * 图片、视频文件预览
      *
      * @param response
      * @param userId
@@ -158,7 +159,7 @@ public class AdminController extends CommonFileController {
      */
     @RequestMapping("/ts/getVideoInfo/{userId}/{fileId}")
     @GlobalInterceptor(checkParams = true, checkAdmin = true)
-    public void getVideoInfo(HttpServletRequest request, HttpServletResponse response,
+    public void getVideoInfo(HttpServletResponse response,
         @PathVariable("userId") @VerifyParam(required = true) String userId,
         @PathVariable("fileId") @VerifyParam(required = true) String fileId) {
         super.getFile(response, fileId, userId);

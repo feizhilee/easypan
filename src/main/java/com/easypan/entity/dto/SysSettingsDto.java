@@ -15,7 +15,7 @@ public class SysSettingsDto implements Serializable {
     /**
      * 注册发送邮件内容
      */
-    private String registerMailContent = "您好，您的邮箱验证码是，%s，15 分钟有效";
+    private String registerEmailContent = "您好，您的邮箱验证码是，%s，15 分钟有效";
 
     /**
      * 用户初始化空间大小 5M
@@ -30,12 +30,12 @@ public class SysSettingsDto implements Serializable {
         this.registerEmailTitle = registerEmailTitle;
     }
 
-    public String getRegisterMailContent() {
-        return registerMailContent;
+    public String getRegisterEmailContent() {
+        return registerEmailContent;
     }
 
-    public void setRegisterMailContent(String registerMailContent) {
-        this.registerMailContent = registerMailContent;
+    public void setRegisterEmailContent(String registerEmailContent) {
+        this.registerEmailContent = registerEmailContent;
     }
 
     public Integer getUserInitUseSpace() {

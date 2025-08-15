@@ -130,6 +130,11 @@ public class FileInfoQuery extends BaseQuery {
      */
     private Boolean queryNickName;
 
+    /**
+     * 查询是否过期
+     */
+    private Boolean queryExpire;
+
     public void setFileId(String fileId) {
         this.fileId = fileId;
     }
@@ -384,5 +389,13 @@ public class FileInfoQuery extends BaseQuery {
 
     public void setQueryNickName(Boolean queryNickName) {
         this.queryNickName = queryNickName;
+    }
+
+    public Boolean getQueryExpire() {
+        return queryExpire;
+    }
+
+    public void setQueryExpire(Boolean queryExpire) {
+        this.queryExpire = queryExpire;
     }
 }

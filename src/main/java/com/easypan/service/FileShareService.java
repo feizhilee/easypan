@@ -1,5 +1,6 @@
 package com.easypan.service;
 
+import com.easypan.entity.dto.SessionShareDto;
 import com.easypan.entity.po.FileShare;
 import com.easypan.entity.query.FileShareQuery;
 import com.easypan.entity.vo.PaginationResultVO;
@@ -71,4 +72,13 @@ public interface FileShareService {
      * @param userId
      */
     void deleteFileShareBatch(String[] shareIdArray, String userId);
+
+    /**
+     * 校验提取码
+     *
+     * @param shareId
+     * @param code
+     * @return
+     */
+    SessionShareDto checkShareCode(String shareId, String code);
 }

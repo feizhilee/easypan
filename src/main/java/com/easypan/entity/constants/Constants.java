@@ -21,6 +21,8 @@ public class Constants {
 
     public static final String SESSION_KEY = "session_key";
 
+    public static final String SESSION_SHARE_KEY = "session_share_key_";
+
     public static final String CHECK_CODE_KEY = "check_code_key";
 
     public static final String CHECK_CODE_KEY_EMAIL = "check_code_key_email";

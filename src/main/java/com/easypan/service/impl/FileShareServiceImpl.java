@@ -1,6 +1,7 @@
 package com.easypan.service.impl;
 
 import com.easypan.entity.constants.Constants;
+import com.easypan.entity.dto.SessionShareDto;
 import com.easypan.entity.enums.PageSize;
 import com.easypan.entity.enums.ResponseCodeEnum;
 import com.easypan.entity.enums.ShareValidTypeEnums;
@@ -143,6 +144,7 @@ public class FileShareServiceImpl implements FileShareService {
 
     /**
      * （批量）取消分享
+     *
      * @param shareIdArray
      * @param userId
      */
@@ -154,6 +156,38 @@ public class FileShareServiceImpl implements FileShareService {
             // 不满足需要抛出异常并回滚
             throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
+    }
+
+    /**
+     * 校验提取码
+     *
+     * @param shareId
+     * @param code
+     * @return
+     */
+    @Override
+    public SessionShareDto checkShareCode(String shareId, String code) {
+        FileShare share = this.fileShareMapper.selectByShareId(shareId);
+        // 为空或者超过了过期时间
+        if (null == share || (share.getExpireTime() != null && new Date().after(share.getExpireTime()))) {
+            throw new BusinessException(ResponseCodeEnum.CODE_902.getMsg());
+        }
+        if (!share.getCode().equals(code)) {
+            throw new BusinessException("提取码错误");
+        }
+        // 更新浏览次数
+        // 不能先查再加1，单人可以，多人并发的情况下会导致脏读，所以要在数据库层面写
+        // Integer showCount = share.getShowCount() + 1;
+        // FileShare updateShare = new FileShare();
+        // updateShare.setShowCount(showCount);
+        // this.fileShareMapper.updateByShareId(updateShare, shareId);
+        this.fileShareMapper.updateShareShowCount(shareId);
+        SessionShareDto sessionShareDto = new SessionShareDto();
+        sessionShareDto.setShareId(shareId);
+        sessionShareDto.setShareUserId(share.getUserId());
+        sessionShareDto.setFileId(share.getFileId());
+        sessionShareDto.setExpireTime(share.getExpireTime());
+        return sessionShareDto;
     }
 
 }

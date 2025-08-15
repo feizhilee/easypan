@@ -104,14 +104,13 @@ public class CommonFileController extends ABaseController {
                 filePath =
                     appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + fileNameNoSuffix + "/" + Constants.M3U8_NAME;
             } else {
-                // 非视频文件
+                // 非视频文件重新设置路径
                 filePath = appConfig.getProjectFolder() + Constants.FILE_FOLDER_FILE + fileInfo.getFilePath();
             }
-
-            File file = new File(filePath);
-            if (!file.exists()) {
-                return;
-            }
+        }
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return;
         }
         readFile(response, filePath);
     }
@@ -151,7 +150,7 @@ public class CommonFileController extends ABaseController {
             throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
         // 不允许下载目录
-        if (FileFolderTypeEnums.FOLDER.getType().equals(fileInfo.getFileCategory())) {
+        if (FileFolderTypeEnums.FOLDER.getType().equals(fileInfo.getFolderType())) {
             throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
         String code = StringTools.getRandomString(Constants.LENGTH_50);
