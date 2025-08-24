@@ -13,7 +13,6 @@
 ## 🛠️ 技术栈
 - **后端**：Spring Boot、MyBatis、Redis、MySQL  
 - **工具**：FFmpeg（视频转码与切片）、Maven  
-- **前端**：Thymeleaf、Bootstrap  
 
 ## 🔑 架构与亮点
 - **分片上传 + 秒传 + 断点续传**：基于 `fileId + md5` 实现，支持中断后继续上传。  
